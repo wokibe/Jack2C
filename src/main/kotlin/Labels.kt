@@ -52,19 +52,21 @@ class Labels {
   // API for this class:
   //
   //                 must be initialized at the beginning of each subroutine
-  //  pushIf()       generate the next pair of I-ELSxx/I-ENDxx on IfStack
+  //  pushIf(id)     generate the next pair of I-ELSxx/I-ENDxx on IfStack
   //  getIfEls()     get current I-ELSxx string
   //  getIfEnd()     get current I-ENDxx string
   //  popIf()        remove top of IfStack
-  //  pushWhile()    generate the next pair of W-EXPxx/W-ENDxx on WhileStack
+  //  pushWhile(id)  generate the next pair of W-EXPxx/W-ENDxx on WhileStack
   //  getWhileExp()  get current W-EXPxx string
   //  getWhileEnd()  get current W-ENDxx string
   //  popWhile()     remove top of WhileStack
   //  isWhileEmpty() check if a break statement is allowed
 
-  fun pushIf() {
-    val labels = Pair( ifTemplate.first + "$nextIf",
-                       ifTemplate.second + "$nextIf")
+  fun pushIf(id: String) {
+    // val labels = Pair( ifTemplate.first + "$nextIf",
+    //                    ifTemplate.second + "$nextIf")
+    val labels = Pair( "$id.${ifTemplate.first}.$nextIf",
+                       "$id.${ifTemplate.second}.$nextIf")
     ifStack.push(labels)
     nextIf++
   }
@@ -100,9 +102,11 @@ class Labels {
     }
   }
 
-  fun pushWhile() {
-    val labels = Pair( whileTemplate.first + "$nextWhile",
-                       whileTemplate.second + "$nextWhile")
+  fun pushWhile(id: String) {
+    // val labels = Pair( whileTemplate.first + "$nextWhile",
+    //                    whileTemplate.second + "$nextWhile")
+    val labels = Pair( "$id.${whileTemplate.first}.$nextWhile^",
+                       "$id.${whileTemplate.second}.$nextWhile")
     whileStack.push(labels)
     nextWhile++
   }

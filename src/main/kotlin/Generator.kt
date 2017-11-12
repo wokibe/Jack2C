@@ -26,7 +26,8 @@ class Generator() {
       LOG.DEBUG("Generator.doClass ast: $ast")
       className = astInfo(ast,"name")
       FIL.clasName = className
-      vmw.comment("class $className")
+      // vmw.comment("class $className")
+      showLine(ast)
       distribute(ast)
     }
     catch (e: InvalidAstInfoKey)    { LOG.FATAL(e.message ?: "") }
@@ -131,8 +132,9 @@ class Generator() {
     subTyp = astInfo(ast, "typ")
     subName = astInfo(ast, "name")
     FIL.subrName = subName
-    vmw.comment("#########################################################")
-    vmw.comment("%s %s %s".format(subKind, subTyp, subName))
+    // vmw.comment("#########################################################")
+    // vmw.comment("%s %s %s".format(subKind, subTyp, subName))
+    showLine(ast)
     sym.startSubroutine()
     if (subKind == "method")  // reserve argument space for pointer to fields
       sym.define("this", className, SymbolKind.ARG)
@@ -182,7 +184,7 @@ class Generator() {
     if (subKind == "constructor") {
       val noFields = sym.getFldCount()
       if (OPT.ENHC)
-        vmw.comment("allocate space for fields")
+        vmw.comment("#E allocate space for fields")
       vmw.constant(noFields)
       vmw.call("Memory", "alloc", 1)
       vmw.pop("pointer", 0)
@@ -191,7 +193,7 @@ class Generator() {
     // in methods "argument 0" must be moved to "pointer 0" ("this" adressing)
     if (subKind == "method") {
       if (OPT.ENHC)
-        vmw.comment("set pointer to fields")
+        vmw.comment("#E set pointer to fields")
       vmw.push("argument", 0)
       vmw.pop("pointer", 0)
     }
@@ -214,10 +216,10 @@ class Generator() {
     fun writeIndexed() {
       doAddressArray(ast, id, seg, typ, idx)
       if (OPT.ENHC)
-        vmw.comment("calculate value")
+        vmw.comment("#E calculate value")
       doAstIf(ast.leafs[1], ASTTYP.Expression)
       if (OPT.ENHC)
-        vmw.comment("store into array")
+        vmw.comment("#E store into array")
       vmw.pop("temp", 0)
       vmw.pop("pointer", 1)
       vmw.push("temp", 0)
@@ -238,7 +240,7 @@ class Generator() {
   private fun doIfStatement(ast: AstTree) {
     LOG.DEBUG("Generator.doIfStatement $ast")
     showLine(ast)
-    lbl.pushIf()
+    lbl.pushIf("$className.$subName")
     doAstIf(ast.leafs[0], ASTTYP.Condition)
     vmw.unaryOp("~")                // test for false
     vmw.ifGoto(lbl.getIfEls())
@@ -254,7 +256,7 @@ class Generator() {
   private fun doWhileStatement(ast: AstTree) {
     LOG.DEBUG("Generator.doWhileStatement $ast")
     showLine(ast)
-    lbl.pushWhile()
+    lbl.pushWhile("$className.$subName")
     vmw.label(lbl.getWhileExp())
     doAstIf(ast.leafs[0], ASTTYP.Condition)
     vmw.unaryOp("~")                // test for false
@@ -280,7 +282,7 @@ class Generator() {
     showLine(ast)
     doAstIf(ast.leafs[0], ASTTYP.SubroutineCall)
     if (OPT.ENHC)
-      vmw.comment("discard the void return")
+      vmw.comment("#E discard the void return")
     vmw.pop("temp", 0)
     }
 
@@ -305,10 +307,10 @@ class Generator() {
     if (!(typ == "Array"))
       invalidIndexing(ast, id)
     if (OPT.ENHC)
-      vmw.comment("calculate array index")
+      vmw.comment("#E calculate array index")
     doAstIf(ast.leafs[0], ASTTYP.ArrayIndex)
     if (OPT.ENHC)
-      vmw.comment("add base address")
+      vmw.comment("#E add base address")
     vmw.push(seg, idx)
     vmw.arithmetic("+")
   }
@@ -322,28 +324,28 @@ class Generator() {
     if (astLook(ast, "name")) {   // call format id.name(...)
       if (symLook(id)) {        // id is a variables
         if (OPT.ENHC)
-          vmw.comment("remote method call")
+          vmw.comment("#E remote method call")
         val symEntry = symSeek(id, ast)
         val seg = symEntry.seg.name.toLowerCase()
         val idx = symEntry.idx
         if (OPT.ENHC)
-          vmw.comment("set arg 0 with remote object")
+          vmw.comment("#E set arg 0 with remote object")
         vmw.push(seg, idx)
         nrParams = 1
         klass = symEntry.typ
       } else {
         if (OPT.ENHC)
-          vmw.comment("remote function call")
+          vmw.comment("#E remote function call")
         klass = id
       }
       name = astInfo(ast, "name")
     } else {                      // local method call
       if (OPT.ENHC)
-        vmw.comment("local method call")
+        vmw.comment("#E local method call")
       klass = className
       name = id
       if (OPT.ENHC)
-        vmw.comment("set arg 0 with local object")
+        vmw.comment("#E set arg 0 with local object")
       vmw.push("pointer", 0)
       nrParams = 1
     }
@@ -393,7 +395,7 @@ class Generator() {
         val idx = symEntry.idx
         doAddressArray(ast, id, seg, typ, idx)
         if (OPT.ENHC)
-          vmw.comment("read from array")
+          vmw.comment("#E read from array")
         vmw.pop("pointer", 1)
         vmw.push("that", 0)
       }
@@ -608,6 +610,6 @@ class Generator() {
 
   private fun showLine(ast: AstTree) {
     val row = astInfo(ast, "stmtLine").toInt()
-    vmw.comment(" %3d %s".format(row, FIL.lines[row-1]))
+    vmw.comment("#J %3d %s".format(row, FIL.lines[row-1]))
   }
 }

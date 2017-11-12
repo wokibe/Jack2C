@@ -182,7 +182,7 @@ addressing of arrays:
     entry.forEach {
       // LOG.DEBUG("SymbolTable.showSeg: entry = $it")
       if (it.seg == seg)
-        txt.add(("## %-8s %6d %-12s %-8s").format(it.seg,
+        txt.add(("#S %-8s %6d %-12s %-8s").format(it.seg,
                                                     it.idx,
                                                     it.name,
                                                     it.typ))

@@ -13,7 +13,7 @@ import com.xenomachina.argparser.*
 //import net.kittenberger.wolfgang.jack2c.Compiler
 import net.kittenberger.wolfgang.mylogger.*
 
-const val JACK2C_VERSION = "0.9.1"
+const val JACK2C_VERSION = "0.9.2"
 
 // get the CLI arguments
 class ParsedArgs(parser: ArgParser) {

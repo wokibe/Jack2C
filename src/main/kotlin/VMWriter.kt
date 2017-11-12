@@ -20,7 +20,7 @@ class VMWriter(path: String) {
     val current = LocalDateTime.now()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val formatted = current.format(formatter)
-    vmf.writeText("// $path generated at $formatted\n")
+    vmf.writeText("// #V generated at $formatted by Jack2c($JACK2C_VERSION)\n")
   }
 
   fun push(cmd: String, int: Int) {
